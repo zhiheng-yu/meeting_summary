@@ -4,8 +4,7 @@ services:
     ports:
       - "6001:6001"
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - OPENAI_BASE_URL=${OPENAI_BASE_URL}
+      - AGNO_URL=${AGNO_URL}
     restart: unless-stopped
     env_file:
       - .env

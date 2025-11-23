@@ -8,7 +8,7 @@ from enum import Enum
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
-from summary_agent import OpenAIAgent
+from summarizer import Summarizer
 
 
 app = FastAPI(
@@ -39,7 +39,6 @@ task_storage: Dict[str, Dict[str, Any]] = {}
 # 请求模型
 class MeetingSummaryRequest(BaseModel):
     conversation: str
-    thinking: Optional[bool] = True
 
 # 任务创建响应模型
 class TaskCreateResponse(BaseModel):
@@ -60,7 +59,7 @@ class TaskStatusResponse(BaseModel):
     error: Optional[str] = None
 
 # 后台任务处理函数
-async def process_meeting_summary(task_id: str, conversation: str, thinking: bool):
+async def process_meeting_summary(task_id: str, conversation: str):
     """后台处理会议纪要生成任务"""
     try:
         # 更新任务状态为处理中
@@ -69,14 +68,14 @@ async def process_meeting_summary(task_id: str, conversation: str, thinking: boo
         task_storage[task_id]["message"] = "正在生成会议纪要..."
 
         # 初始化 AI 代理
-        agent = OpenAIAgent(thinking)
+        summarizer = Summarizer()
 
         # 使用线程池执行阻塞的AI调用
         loop = asyncio.get_event_loop()
         with ThreadPoolExecutor() as executor:
             result = await loop.run_in_executor(
                 executor,
-                agent.meeting_summary,
+                summarizer.meeting_summary,
                 conversation
             )
 
@@ -86,9 +85,7 @@ async def process_meeting_summary(task_id: str, conversation: str, thinking: boo
         task_storage[task_id]["message"] = "会议纪要生成完成"
         task_storage[task_id]["result"] = {
             "success": True,
-            "content": result.get("content", ""),
-            "reasoning_content": result.get("reasoning_content"),
-            "thinking": result.get("thinking", thinking)
+            "content": result
         }
 
     except Exception as e:
@@ -128,7 +125,6 @@ async def create_meeting_summary_task(request: MeetingSummaryRequest, background
             "task_id": task_id,
             "status": TaskStatus.PENDING,
             "conversation": request.conversation,
-            "thinking": request.thinking,
             "created_at": current_time,
             "updated_at": current_time,
             "message": "任务已创建，等待处理",
@@ -140,8 +136,7 @@ async def create_meeting_summary_task(request: MeetingSummaryRequest, background
         background_tasks.add_task(
             process_meeting_summary,
             task_id,
-            request.conversation,
-            request.thinking
+            request.conversation
         )
 
         return TaskCreateResponse(
@@ -196,19 +191,6 @@ async def list_tasks():
             for task in task_storage.values()
         ],
         "total": len(task_storage)
-    }
-
-# 获取支持的模型信息
-@app.get("/api/models")
-async def get_models():
-    return {
-        "models": [
-            {
-                "name": "qwen3-30b-a3b-thinking-2507",
-                "description": "通义千问3-30B 思考模型",
-                "supports_thinking": True
-            }
-        ]
     }
 
 if __name__ == "__main__":
