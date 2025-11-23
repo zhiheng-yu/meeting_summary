@@ -47,20 +47,24 @@
 
 ### 方式二：Docker 部署
 
-1. 创建 `.env` 文件（可选）：
+1. 创建 `.env` 文件：
    ```bash
    echo "AGNO_URL=http://localhost:7777" > .env
    ```
 
-2. 使用 Docker Compose 启动：
+2. 构建 Docker 镜像：
+   ```bash
+   docker build -t meeting-assistant .
+   ```
+
+3. 使用 Docker Compose 启动：
    ```bash
    docker-compose up -d
    ```
 
    或者使用 Docker 直接运行：
    ```bash
-   docker build -t meeting-summary .
-   docker run -d -p 6001:6001 -e AGNO_URL=http://localhost:7777 meeting-summary
+   docker run -d -p 6001:6001 -e AGNO_URL=http://localhost:7777 meeting-assistant
    ```
 
 ### 接口使用方法

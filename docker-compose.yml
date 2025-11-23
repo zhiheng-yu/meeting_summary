@@ -1,6 +1,6 @@
 services:
   api:
-    build: .
+    image: meeting_assistant
     ports:
       - "6001:6001"
     environment:
