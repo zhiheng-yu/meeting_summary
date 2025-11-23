@@ -9,21 +9,19 @@
 - **智能摘要**：自动分析会议转录内容，提取关键信息
 - **结构化输出**：生成格式统一、条理清晰的会议纪要
 - **异步处理**：支持大文件的后台处理，避免长时间等待
-- **思考过程可视化**：可选显示AI的推理思考过程
 - **RESTful API**：提供标准的API接口，便于集成到其他系统
 - **实时状态查询**：支持任务状态的实时查询
+- **Docker 支持**：提供 Docker 容器化部署方案
 
 ## 项目结构
 
 ```
 .
 ├── api.py                  # FastAPI后端服务
-├── main.py                 # 命令行版本主程序
-├── summary_agent.py        # AI代理核心逻辑
-├── config/                 # 配置文件目录
-│   ├── summary_prompt.md   # AI提示词模板
-│   └── minutes_format.md   # 会议纪要格式模板
+├── summarizer.py           # Agno API调用封装
 ├── requirements.txt        # Python依赖包列表
+├── Dockerfile              # Docker镜像构建文件
+├── docker-compose.yml      # Docker Compose配置文件
 ├── sample.txt              # 示例会议转录文件
 └── test_curl.sh            # API测试脚本
 ```
@@ -31,9 +29,11 @@
 ## 环境要求
 
 - Python 3.8+
-- OpenAI API 兼容接口及密钥
+- Agno API 服务（用于AI摘要生成）
 
 ## 安装步骤
+
+### 方式一：直接运行
 
 1. 克隆项目代码：
    ```bash
@@ -46,11 +46,33 @@
    pip install -r requirements.txt
    ```
 
-3. 配置API密钥：
-   系统会自动从环境变量中读取API密钥和基础URL，请确保设置以下环境变量：
+3. 配置环境变量：
+   系统会自动从环境变量中读取 Agno API 服务地址，请确保设置以下环境变量：
    ```bash
-   export OPENAI_API_KEY="your-api-key"
-   export OPENAI_BASE_URL="your-openai-api-compatible-url"  # 可选，默认为 https://api.openai.com/v1
+   export AGNO_URL="http://localhost:7777"  # Agno API 服务地址
+   ```
+
+4. 启动服务：
+   ```bash
+   python api.py
+   ```
+
+### 方式二：Docker 部署
+
+1. 创建 `.env` 文件（可选）：
+   ```bash
+   echo "AGNO_URL=http://localhost:7777" > .env
+   ```
+
+2. 使用 Docker Compose 启动：
+   ```bash
+   docker-compose up -d
+   ```
+
+   或者使用 Docker 直接运行：
+   ```bash
+   docker build -t meeting-summary .
+   docker run -d -p 6001:6001 -e AGNO_URL=http://localhost:7777 meeting-summary
    ```
 
 ## 使用方法
@@ -69,7 +91,7 @@ python api.py
 
 #### 1. 健康检查
 ```
-GET /
+GET /health
 ```
 
 #### 2. 创建会议纪要任务
@@ -79,8 +101,7 @@ POST /api/summary
 请求体：
 ```json
 {
-  "conversation": "会议转录内容",
-  "thinking": true
+  "conversation": "会议转录内容"
 }
 ```
 
@@ -102,22 +123,3 @@ GET /api/tasks
 chmod +x test_curl.sh
 ./test_curl.sh
 ```
-
-## 配置说明
-
-### AI提示词模板 (`config/summary_prompt.md`)
-
-定义了AI代理的角色、技能、规则、工作流程和输出格式等。
-
-### 会议纪要格式模板 (`config/minutes_format.md`)
-
-定义了生成会议纪要的标准格式结构。
-
-## 输出示例
-
-生成的会议纪要包含以下主要部分：
-
-1. **基本信息**：会议日期、时间、参会人员等
-2. **会议议程**：会议的主要议题列表
-3. **讨论要点**：各议题的详细讨论内容
-4. **行动项**：需要跟进的任务、负责人和截止时间
