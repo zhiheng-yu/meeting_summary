@@ -19,6 +19,10 @@
 - Python 3.8+
 - Agno API 服务（用于AI摘要生成）
 
+## 依赖服务
+
+[meeting-agents（基于 Agno 框架构建的会议智能体）](https://github.com/zhiheng-yu/meeting-agents)
+
 ## 安装步骤
 
 ### 方式一：直接运行
