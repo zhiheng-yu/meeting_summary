@@ -3,6 +3,10 @@ import requests
 import json
 import time
 from typing import Generator, Union
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class Counselor:
@@ -80,7 +84,7 @@ class Counselor:
                         event = event_data.get("event", "")
                         content = event_data.get("content", "")
                         if event == "ToolCallCompleted":
-                            print(content)
+                            logger.info(f"ToolCallCompleted: {content}")
                         if event == "RunContent" and content:
                             yield content
                     except json.JSONDecodeError:
