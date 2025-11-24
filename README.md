@@ -2,34 +2,26 @@
 
 ## 项目简介
 
-会议纪要生成系统是一个基于人工智能技术的会议内容自动摘要工具。该系统能够将会议转录文本自动分析并生成结构化的会议纪要，包括会议基本信息、议程、讨论要点、决策事项和后续行动项等内容。
+会议纪要生成系统是一个基于人工智能技术的会议内容自动摘要和知识管理工具。该系统能够将会议转录文本自动分析并生成结构化的会议纪要，同时支持将会议内容上传到知识库，并提供基于知识库的智能咨询功能。
 
 ## 功能特点
 
-- **智能摘要**：自动分析会议转录内容，提取关键信息
-- **结构化输出**：生成格式统一、条理清晰的会议纪要
-- **异步处理**：支持大文件的后台处理，避免长时间等待
+- **智能摘要**：自动分析会议转录内容，提取关键信息并生成结构化会议纪要
+- **知识库管理**：支持将会议转录内容上传到知识库，便于后续查询和分析
+- **智能咨询**：基于知识库内容提供流式响应的智能咨询功能
+- **会话历史**：支持查询和删除特定会议的历史对话记录
 - **RESTful API**：提供标准的API接口，便于集成到其他系统
-- **实时状态查询**：支持任务状态的实时查询
+- **流式响应**：咨询接口支持 Server-Sent Events (SSE) 流式输出
 - **Docker 支持**：提供 Docker 容器化部署方案
-
-## 项目结构
-
-```
-.
-├── api.py                  # FastAPI后端服务
-├── summarizer.py           # Agno API调用封装
-├── requirements.txt        # Python依赖包列表
-├── Dockerfile              # Docker镜像构建文件
-├── docker-compose.yml      # Docker Compose配置文件
-├── sample.txt              # 示例会议转录文件
-└── test_curl.sh            # API测试脚本
-```
 
 ## 环境要求
 
 - Python 3.8+
 - Agno API 服务（用于AI摘要生成）
+
+## 依赖服务
+
+[meeting-agents（基于 Agno 框架构建的会议智能体）](https://github.com/zhiheng-yu/meeting-agents)
 
 ## 安装步骤
 
@@ -59,67 +51,26 @@
 
 ### 方式二：Docker 部署
 
-1. 创建 `.env` 文件（可选）：
+1. 创建 `.env` 文件：
    ```bash
    echo "AGNO_URL=http://localhost:7777" > .env
    ```
 
-2. 使用 Docker Compose 启动：
+2. 构建 Docker 镜像：
+   ```bash
+   docker build -t meeting-assistant .
+   ```
+
+3. 使用 Docker Compose 启动：
    ```bash
    docker-compose up -d
    ```
 
    或者使用 Docker 直接运行：
    ```bash
-   docker build -t meeting-summary .
-   docker run -d -p 6001:6001 -e AGNO_URL=http://localhost:7777 meeting-summary
+   docker run -d -p 6001:6001 -e AGNO_URL=http://localhost:7777 meeting-assistant
    ```
 
-## 使用方法
+### 接口使用方法
 
-### API服务
-
-启动API服务：
-
-```bash
-python api.py
-```
-
-默认监听端口为6001。
-
-### API接口说明
-
-#### 1. 健康检查
-```
-GET /health
-```
-
-#### 2. 创建会议纪要任务
-```
-POST /api/summary
-```
-请求体：
-```json
-{
-  "conversation": "会议转录内容"
-}
-```
-
-#### 3. 查询任务状态
-```
-GET /api/tasks/{task_id}
-```
-
-#### 4. 获取所有任务列表
-```
-GET /api/tasks
-```
-
-### 测试脚本
-
-项目提供了cURL测试脚本，可直接运行：
-
-```bash
-chmod +x test_curl.sh
-./test_curl.sh
-```
+[会议助手接口文档-Apifox](https://s.apifox.cn/b06653a0-ec1a-41a5-8890-f5e9f9672f60)
