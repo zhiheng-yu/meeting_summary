@@ -82,11 +82,14 @@ class Counselor:
                         json_str = line[6:]  # 移除 "data: " 前缀
                         event_data = json.loads(json_str)
                         event = event_data.get("event", "")
+                        reason_content = event_data.get("reasoning_content", "")
                         content = event_data.get("content", "")
                         if event == "ToolCallCompleted":
                             logger.info(f"ToolCallCompleted: {content}")
-                        if event == "RunContent" and content:
-                            yield content
+                        elif event == "RunContent" and reason_content:
+                            yield "", reason_content, "thinking"
+                        elif event == "RunContent" and content:
+                            yield content, "", "end"
                     except json.JSONDecodeError:
                         pass
         except requests.exceptions.RequestException as e:

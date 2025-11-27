@@ -69,10 +69,12 @@ def counsel(meeting_id: str = Form(...), message: str = Form(...)):
 
     def generate():
         try:
-            for content in counselor.counsel(meeting_id, message):
+            for content, reason_content, status in counselor.counsel(meeting_id, message):
                 # 使用 SSE 格式返回流式数据
                 json_data = {
-                    "content": content
+                    "content": content,
+                    "reason_content": reason_content,
+                    "status": status
                 }
                 yield f"data: {json.dumps(json_data, ensure_ascii=False)}\n\n"
         except Exception as e:
